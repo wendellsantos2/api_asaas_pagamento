@@ -1,7 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Payment } from './payments.entity'; // Substitua pelo caminho correto para sua entidade Payment
 import axios, { AxiosInstance } from 'axios';
 import { SaleCreateLinkPaymentDTO } from './payments.controller';
 
@@ -9,10 +6,7 @@ import { SaleCreateLinkPaymentDTO } from './payments.controller';
 export class PaymentService {
     private httpClient: AxiosInstance;
 
-    constructor(
-        @InjectRepository(Payment)
-        private paymentRepository: Repository<Payment>, // Injetando o repositório TypeORM para Payment
-    ) {
+    constructor() {
         this.httpClient = axios.create({
             baseURL: 'https://api.asaas.com/v3/', // Base URL da API
             headers: {
@@ -23,22 +17,11 @@ export class PaymentService {
         });
     }
 
-    // Método para encontrar todos os pagamentos
-    findAll(): Promise<Payment[]> {
-        return this.paymentRepository.find();
-    }
-
-    // Método para criar um novo pagamento no banco de dados
-    async create(payment: Payment): Promise<Payment> {
-        return this.paymentRepository.save(payment);
-    }
-
     // Método para criar um link de pagamento através de uma API externa
     async createPaymentLink(saleCreateLinkPaymentDTO: SaleCreateLinkPaymentDTO): Promise<any> {
         try {
             // Construindo o payload com base no DTO
             const payload = {
-                 
                 billingType: saleCreateLinkPaymentDTO.billingType,
                 chargeType: saleCreateLinkPaymentDTO.chargeType,
                 name: saleCreateLinkPaymentDTO.name,
@@ -49,7 +32,6 @@ export class PaymentService {
                 subscriptionCycle: saleCreateLinkPaymentDTO.subscriptionCycle,
                 maxInstallmentCount: saleCreateLinkPaymentDTO.maxInstallmentCount,
                 notificationEnabled: saleCreateLinkPaymentDTO.notificationEnabled,
-                
             };
     
             const response = await this.httpClient.post('paymentLinks', payload);
@@ -64,5 +46,4 @@ export class PaymentService {
             }
         }
     }
-    
 }
